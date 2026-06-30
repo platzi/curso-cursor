@@ -1,0 +1,37 @@
+---
+description: Convenciones de testing con Vitest
+globs: **/*.test.ts, **/*.spec.ts, **/vitest.config.ts
+alwaysApply: false
+---
+
+# Testing con Vitest
+
+Framework único: Vitest. Agregado con `pnpm -r test`; por paquete con `pnpm --filter @ff/x test`.
+
+## Dónde viven los tests
+
+- Junto al código que prueban, dentro de `src/`, con sufijo `*.test.ts` o `*.spec.ts`.
+- Entorno `node` (no jsdom) para `@ff/domain`, `@ff/db` y `@ff/api`.
+
+## Qué se testea (mínimos)
+
+- `@ff/domain`: lógica pura con tests unitarios. El evaluador de flags DEBE tener tests de cascada (archived → environment → company → percentage → default), stickiness por `user_id`, distribución aproximada del porcentaje y `fail_mode`.
+- `@ff/db`: al menos un test de integración que lea/escriba contra SQLite.
+- `@ff/api`: tests de endpoints (casos felices y errores: 400/404/409, escritura en `audit_log`).
+
+## Criterios
+
+- Cada criterio de aceptación verificable de una spec debe tener un test que lo cubra.
+- Tests deterministas y aislados; sin depender de orden de ejecución ni de red.
+- Paquetes sin tests aún: usa `vitest run --passWithNoTests` para no romper el agregado.
+
+```typescript
+import { describe, expect, it } from "vitest";
+import { evaluateFlag } from "./evaluate";
+
+describe("evaluateFlag", () => {
+  it("devuelve false si la flag está archived", () => {
+    expect(evaluateFlag(archivedFlag, [], ctx)).toBe(false);
+  });
+});
+```

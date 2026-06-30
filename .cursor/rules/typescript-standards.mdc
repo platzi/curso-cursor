@@ -1,0 +1,32 @@
+---
+description: Estándares de TypeScript estricto y tipos compartidos del proyecto
+alwaysApply: true
+---
+
+# TypeScript
+
+`strict: true` heredado de `tsconfig.base.json`. Código tipado de forma explícita y segura.
+
+## Reglas
+
+- Prohibido `any` (implícito o explícito). Si el tipo es desconocido, usa `unknown` y estrecha con guardas.
+- Prohibido `as` para forzar tipos salvo casos justificados (con comentario explicando por qué es seguro). Nunca `as any`.
+- Los tipos de dominio compartidos viven en `@ff/domain` y se importan desde ahí; no se redefinen en `apps/web` ni `apps/api`.
+- Modela los enums del dominio como uniones de literales, no `enum` de TS:
+
+```typescript
+// ✅ GOOD (en @ff/domain)
+export type FlagStatus = "draft" | "active" | "deprecated" | "archived";
+export type RuleType = "environment" | "company" | "percentage";
+
+// ❌ BAD
+function evaluate(ctx: any) { /* ... */ }
+```
+
+- Prefiere `type`/`interface` explícitos en límites públicos (params y retornos de funciones exportadas).
+- Sin `// @ts-ignore`; usa `// @ts-expect-error` con motivo solo si es inevitable.
+- Errores tipados: lanza errores concretos, no strings.
+
+## Booleanos y persistencia
+
+En `@ff/db` los booleanos se guardan como `integer` 0/1; conviértelos a `boolean` en el límite del paquete para que el resto del código maneje `boolean` real.

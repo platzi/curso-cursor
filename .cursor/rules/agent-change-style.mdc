@@ -1,0 +1,30 @@
+---
+description: Estilo de cambios para agentes (alcance, commits, dependencias)
+alwaysApply: true
+---
+
+# Estilo de cambios de agentes
+
+## Alcance
+
+- Implementa una spec a la vez (`docs/specs/NN-*.md`). No toques archivos fuera del alcance declarado en esa spec.
+- Respeta el orden y las dependencias entre specs; no adelantes trabajo de specs posteriores.
+- Si detectas que necesitas salir del alcance, detente y explícalo antes de hacerlo.
+
+## Commits
+
+- Commits pequeños y atómicos, uno por unidad lógica de cambio.
+- Mensajes en imperativo y con contexto del "por qué" (no solo el "qué").
+- No crear commits salvo que el usuario lo pida explícitamente.
+
+## Dependencias
+
+- No instalar dependencias nuevas sin justificación clara (qué problema resuelve y por qué no basta lo existente).
+- Mantén una sola versión por dependencia en el monorepo; usa `-w` para devDependencies compartidas (p. ej. `vitest`, `typescript`).
+- No añadir `turbo` ni `turbo.json` (el proyecto usa solo `pnpm -r`).
+
+## Higiene
+
+- No reformatees código ni archivos no relacionados con tu cambio.
+- No introduzcas TODOs ni código muerto.
+- Tras editar, verifica typecheck/tests relevantes del paquete afectado antes de dar por hecha la tarea.
