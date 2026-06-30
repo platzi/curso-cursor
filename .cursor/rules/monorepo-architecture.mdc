@@ -1,0 +1,32 @@
+---
+description: Arquitectura del monorepo y separación de responsabilidades entre apps y packages
+alwaysApply: true
+---
+
+# Arquitectura del monorepo
+
+Monorepo pnpm (sin Turborepo). Scope de paquetes `@ff/*`. Orquestación con `pnpm -r`.
+
+## Responsabilidades (no cruzarlas)
+
+- `apps/web` (`@ff/web`): Next.js (App Router) + Tailwind. Solo UI. Consume la API por HTTP; NO importa `@ff/db` ni accede a SQLite directamente.
+- `apps/api` (`@ff/api`): Hono. Transporte HTTP, rutas `/api/v1/*`, validación de entrada, sesión/auth y escritura de `audit_log`. Orquesta `@ff/db` y `@ff/domain`.
+- `packages/db` (`@ff/db`): Drizzle ORM + SQLite/libSQL. Schema, migraciones, seed y acceso a datos. Sin lógica de negocio ni HTTP.
+- `packages/domain` (`@ff/domain`): tipos compartidos y lógica pura (incluido el evaluador de flags). Sin dependencias de framework, sin I/O, sin HTTP, sin Drizzle.
+
+## Reglas de dependencia
+
+```
+web  ->  (HTTP)  ->  api  ->  db
+                       \\->  domain  <-  (tipos)  web
+```
+
+- Permitido: `api` importa `db` y `domain`; `web` y `db` importan tipos de `domain`.
+- Prohibido: `domain` importa cualquier cosa de `db`/`api`/`web`; `web` importa `db`; lógica de negocio dentro de `apps/*`.
+- Dependencias entre workspaces siempre con `"@ff/x": "workspace:*"`.
+
+## Convenciones
+
+- Puertos: web `3000`, api `3001` (`PORT` configurable).
+- ESM (`"type": "module"`) en api y packages.
+- La fuente de verdad funcional son el PRD (`docs/prds/`) y las specs (`docs/specs/`).

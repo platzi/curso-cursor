@@ -1,0 +1,41 @@
+---
+description: La lógica de evaluación de flags vive en packages/domain y es pura
+globs: packages/domain/**/*.ts
+alwaysApply: false
+---
+
+# Evaluación de flags (packages/domain)
+
+El evaluador y los tipos del dominio viven aquí. Núcleo puro, reutilizable por API y tests.
+
+## Pureza obligatoria
+
+- Funciones puras: mismo input → mismo output, sin efectos secundarios.
+- Prohibido en `@ff/domain`: acceso a DB/Drizzle, `fetch`/HTTP, lectura de `process.env`, logging, `Date.now()`/aleatoriedad no inyectada.
+- Recibe los datos ya cargados (flag + reglas + contexto) como argumentos; no los va a buscar.
+- Separado de la UI (`apps/web`) y del transporte HTTP (`apps/api`): esos solo llaman al evaluador.
+
+## Algoritmo (cascada del PRD)
+
+1. Flag `archived` → `false`.
+2. Regla `environment` que coincide → su `value`.
+3. Regla `company` que coincide → su `value`.
+4. Regla `percentage` → `hash(user_id + flag_key) % 100 < percentage`; si queda fuera, la regla no aplica.
+5. Si nada aplica → `default_value`.
+6. Si el store falla (lo decide la capa API) → aplicar `fail_mode`.
+7. Flag inexistente → `false`.
+
+- El hash debe ser estable y determinista (stickiness por `user_id`); no usar `Math.random`.
+
+```typescript
+export function evaluateFlag(
+  flag: Flag,
+  rules: TargetingRule[],
+  ctx: EvaluationContext,
+): boolean {
+  if (flag.status === "archived") return false;
+  // environment -> company -> percentage -> default
+}
+```
+
+`fail_mode` y la traducción de errores de I/O son responsabilidad de `apps/api`, no del dominio.

@@ -1,0 +1,35 @@
+---
+description: Convenciones de componentes React y frontend en apps/web
+globs: apps/web/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# React y frontend (apps/web)
+
+Next.js App Router + Tailwind CSS. Solo UI; los datos vienen de la API.
+
+## Componentes
+
+- Componentes funcionales con props tipadas (sin `React.FC`).
+- Server Components por defecto; añade `"use client"` solo cuando necesites estado, efectos o eventos.
+- Extrae lógica reutilizable a hooks (`useXxx`); no dupliques fetch/estado entre páginas.
+- Un componente por archivo; nómbralos en `PascalCase`, hooks en `camelCase`.
+
+## Datos y API
+
+- Accede a los datos solo vía la API (`/api/v1/*`) con `fetch`; nunca importes `@ff/db`.
+- Reutiliza los tipos de `@ff/domain` para las respuestas; no redefinas shapes locales.
+- Maneja siempre los tres estados de carga de datos: cargando, vacío y error.
+
+## Estilos
+
+- Estiliza con clases de Tailwind; evita CSS suelto y estilos inline salvo casos puntuales.
+- Mantén la accesibilidad básica: labels en inputs, roles/aria donde aplique, foco visible.
+
+```tsx
+// ✅ GOOD
+type FlagRowProps = { flag: Flag };
+export function FlagRow({ flag }: FlagRowProps) {
+  return <tr className="border-b"><td className="px-3 py-2">{flag.key}</td></tr>;
+}
+```
