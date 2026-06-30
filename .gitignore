@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+*.tsbuildinfo
+
+# Database (SQLite/libSQL local)
+*.db
+*.db-journal
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
