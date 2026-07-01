@@ -1,3 +1,4 @@
+import type { AuditLogEntry } from "@/types/audit-log";
 import type { CreateFlagInput, Flag, FlagStatus, UpdateFlagPatch } from "@/types/flags";
 
 export const API_URL = process.env.API_URL ?? "http://127.0.0.1:3001";
@@ -59,6 +60,25 @@ export async function getFlags(status?: FlagStatus): Promise<Flag[]> {
   }
 
   return data as Flag[];
+}
+
+export async function getAuditLog(flagKey?: string): Promise<AuditLogEntry[]> {
+  const query = flagKey ? `?flag=${encodeURIComponent(flagKey)}` : "";
+  const response = await apiFetch(`/audit-log${query}`);
+
+  if (!response.ok) {
+    throw new ApiError(
+      `Failed to fetch audit log (${response.status})`,
+      response.status,
+    );
+  }
+
+  const data: unknown = await response.json();
+  if (!Array.isArray(data)) {
+    throw new ApiError("Invalid audit log response", 500);
+  }
+
+  return data as AuditLogEntry[];
 }
 
 async function readErrorMessage(response: Response): Promise<string> {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "./logout-button";
@@ -44,11 +45,31 @@ export default async function DashboardPage() {
         <LogoutButton />
       </div>
 
-      <section className="mx-auto mt-10 max-w-3xl rounded-xl border border-slate-800 bg-slate-900 p-6">
-        <h2 className="text-lg font-medium">Feature Flags</h2>
-        <p className="mt-2 text-sm text-slate-400">
-          Panel de gestión (specs posteriores). Has iniciado sesión correctamente.
-        </p>
+      <section className="mx-auto mt-10 max-w-3xl space-y-4">
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <h2 className="text-lg font-medium">Feature Flags</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Gestiona flags y su configuración.
+          </p>
+          <Link
+            href="/flags"
+            className="mt-4 inline-block text-sm text-sky-400 hover:text-sky-300"
+          >
+            Ir a flags →
+          </Link>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+          <h2 className="text-lg font-medium">Historial de auditoría</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Consulta el registro de cambios en flags y reglas.
+          </p>
+          <Link
+            href="/history"
+            className="mt-4 inline-block text-sm text-sky-400 hover:text-sky-300"
+          >
+            Ver historial →
+          </Link>
+        </div>
       </section>
     </main>
   );

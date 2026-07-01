@@ -28,6 +28,38 @@ test.describe("spec 06 — listado de flags", () => {
   });
 });
 
+test.describe("spec 11 — historial audit log", () => {
+  test("CA-11: /history sin sesión redirige a login", async ({ page }) => {
+    await page.goto("/history");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("CA-11: historial append-only y estado vacío", async ({ page }) => {
+    await loginViaUi(page);
+    await page.goto("/history");
+
+    await expect(page).toHaveURL(/\/history/);
+    await expect(
+      page.getByRole("heading", { name: "Historial de auditoría" }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Filtrar por flag")).toBeVisible();
+    await expect(page.getByText("Sin entradas en el historial.")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /eliminar|editar|borrar/i }),
+    ).toHaveCount(0);
+  });
+
+  test("navegación flags ↔ historial", async ({ page }) => {
+    await loginViaUi(page);
+    await page.goto("/flags");
+    await page.getByRole("link", { name: "Historial" }).click();
+    await expect(page).toHaveURL(/\/history/);
+
+    await page.getByRole("link", { name: "Flags" }).click();
+    await expect(page).toHaveURL(/\/flags/);
+  });
+});
+
 test.describe("spec 07 — crear y editar flag", () => {
   test("formulario de creación valida key vacía", async ({ page }) => {
     await loginAsDemo(page);

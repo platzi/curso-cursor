@@ -22,5 +22,6 @@ export async function evaluateBatchStub(c: Context): Promise<Response> {
 export function createAdminStubRouter(): Hono {
   const admin = new Hono();
   admin.get("/flags", (ctx) => ctx.json([]));
+  admin.get("/audit-log", (ctx) => ctx.json([]));
   return admin;
 }
