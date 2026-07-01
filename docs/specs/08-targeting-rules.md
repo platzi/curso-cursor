@@ -12,8 +12,33 @@ Cubre **RF-17** (gestionar reglas en la UI) y **RF-06..RF-10** (añadir environm
 
 ### Specs previas requeridas (deben estar implementadas)
 
-- **07 — Crear/editar flag**: existe el detalle/edición de una flag (`/flags/[key]`), el helper `apiFetch` en `apps/web/src/lib/api.ts`, los tipos `Flag`, `ApiError`, y `getFlag(key)`. Esta spec añade la sección de reglas en esa página de detalle.
+- **07 — Crear/editar flag**: existe el detalle/edición de una flag (`/flags/[key]`), el helper `apiFetch` en `apps/web/lib/api.ts`, los tipos `Flag`, `ApiError`, y `getFlag(key)`. Esta spec añade la sección de reglas en esa página de detalle.
 - Transitivamente: **01** (monorepo + Next + Tailwind), **02** (Vitest + testing de componentes), **03** (seed con `checkout_v2` y reglas de ejemplo), **04** (API de reglas), **05** (login + sesión por cookie; admin protegido), **06** (listado + helper de API base).
+
+### Multitask y paralelización
+
+| Campo | Valor |
+|-------|-------|
+| **Wave** | **3** — tras completar **07** (no puede empezar antes) |
+| **Paralelo con** | **11** (si 11 sigue en curso o ya terminó en wave 2) |
+| **Requiere antes** | 06, 07 |
+| **No paralelizar con** | **06** (solo transitivo), **07** (prerequisito directo) |
+
+```
+Wave 1:  [06]
+Wave 2:  [07] ║ [11]
+Wave 3:  [08] ║ [11]   ← 08 solo tras 07; 11 puede solaparse
+```
+
+**Conflictos probables al correr en paralelo con 11:**
+
+| Archivo | Riesgo | Mitigación |
+|---------|--------|------------|
+| `apps/web/lib/api.ts` | Medio — `getRules`/`createRule`/`deleteRule` vs `getAuditLog` | Funciones independientes; merge por bloques |
+| Navegación admin | Bajo–medio | Combinar enlaces en el merge |
+| `apps/web/app/flags/[key]/` | Ninguno con 11 | 11 no toca el detalle de flag |
+
+**Archivos exclusivos de esta spec:** componentes `RulesList`, `RuleForm`; sección de reglas dentro de `/flags/[key]`.
 
 ### Modelos de datos
 
@@ -87,7 +112,7 @@ Página admin: requiere sesión por cookie (spec 05). Reenviar cookie en server 
 
 ## 4. Tareas en orden
 
-1. **Extender el helper de API** (`apps/web/src/lib/api.ts`):
+1. **Extender el helper de API** (`apps/web/lib/api.ts`):
    - `getRules(flagId)` → `GET /flags/:flagId/rules` → `TargetingRule[]`.
    - `createRule(flagId, input)` → `POST /flags/:flagId/rules`; `input` tipado como unión discriminada por `type` (ver tipos abajo). Propaga `ApiError` (status) en fallo.
    - `deleteRule(flagId, ruleId)` → `DELETE /flags/:flagId/rules/:ruleId`.

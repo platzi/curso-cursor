@@ -1,4 +1,5 @@
 import type { CreateFlagInput, Flag, FlagStatus, UpdateFlagPatch } from "@/types/flags";
+import type { CreateRuleInput, TargetingRule } from "@/types/rules";
 
 export const API_URL = process.env.API_URL ?? "http://127.0.0.1:3001";
 export const SESSION_COOKIE_NAME =
@@ -114,4 +115,52 @@ export async function updateFlag(key: string, patch: UpdateFlagPatch): Promise<F
   }
 
   return (await response.json()) as Flag;
+}
+
+export async function getRules(flagId: string): Promise<TargetingRule[]> {
+  const response = await apiFetch(
+    `/flags/${encodeURIComponent(flagId)}/rules`,
+  );
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response), response.status);
+  }
+
+  const data: unknown = await response.json();
+  if (!Array.isArray(data)) {
+    throw new ApiError("Invalid rules response", 500);
+  }
+
+  return data as TargetingRule[];
+}
+
+export async function createRule(
+  flagId: string,
+  input: CreateRuleInput,
+): Promise<TargetingRule> {
+  const response = await apiFetch(
+    `/flags/${encodeURIComponent(flagId)}/rules`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    },
+  );
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response), response.status);
+  }
+
+  return (await response.json()) as TargetingRule;
+}
+
+export async function deleteRule(flagId: string, ruleId: string): Promise<void> {
+  const response = await apiFetch(
+    `/flags/${encodeURIComponent(flagId)}/rules/${encodeURIComponent(ruleId)}`,
+    { method: "DELETE" },
+  );
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response), response.status);
+  }
 }
