@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { StatusControl } from "@/components/flags/status-control";
 import { StatusBadge } from "@/components/flags/status-badge";
+import { TargetingRulesSection } from "@/components/flags/targeting-rules-section";
 import { LogoutButton } from "@/app/dashboard/logout-button";
 import { ApiError, getFlag } from "@/lib/api";
 
@@ -77,6 +78,10 @@ export default async function FlagDetailPage({ params }: FlagDetailPageProps) {
           <div className="mt-4">
             <StatusControl flagKey={flag.key} status={flag.status} />
           </div>
+        </section>
+
+        <section className="mt-8">
+          <TargetingRulesSection flagId={flag.id} />
         </section>
       </div>
     </main>
