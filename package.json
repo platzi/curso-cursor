@@ -4,9 +4,13 @@
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm -r dev",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "devDependencies": {
+    "@playwright/mcp": "^0.0.68",
+    "@playwright/test": "^1.61.1",
     "typescript": "^5.9.0",
     "vitest": "^4.1.9"
   }

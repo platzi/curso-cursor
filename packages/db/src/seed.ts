@@ -1,6 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db, schema } from "./client.js";
 
+const demoUsername = process.env.DEMO_USERNAME ?? "admin";
+const demoPassword = process.env.DEMO_PASSWORD ?? "demo123";
+
 async function seed() {
   const existing = await db.query.flags.findFirst({
     where: eq(schema.flags.key, "checkout_v2"),
@@ -50,6 +53,11 @@ async function seed() {
   ]);
 
   console.log("Seed completado: checkout_v2 + 3 reglas");
+  console.log("");
+  console.log("Usuario demo (login):");
+  console.log(`  username: ${demoUsername}`);
+  console.log(`  password: ${demoPassword}`);
+  console.log("  (configurable via DEMO_USERNAME / DEMO_PASSWORD en .env)");
 }
 
 seed()
