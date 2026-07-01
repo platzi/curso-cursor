@@ -10,11 +10,39 @@ Cubre **RF-19** (mostrar audit log), **RNF-07** (append-only, no editable ni eli
 
 ### Specs previas requeridas (deben estar implementadas)
 
-- **04 — API feature flags**: las operaciones de escritura (crear/editar/archivar flag, crear/eliminar regla) ya **registran entradas en el audit log**, y existe el endpoint `GET /api/v1/audit-log`. Esta spec **depende de la 04**.
-- **05 — Basic login**: sesión por cookie; páginas admin protegidas. (El audit log es admin.)
-- Para que existan entradas reales que mostrar, conviene que estén implementadas las specs que generan escrituras: **07** (editar flag → CA-09) y **08** (crear/eliminar reglas). No son estrictamente necesarias para construir la vista, pero sí para verla con datos.
-- Reutiliza el helper `apiFetch` de `apps/web/src/lib/api.ts` (introducido en spec 06).
+- **06 — Dashboard list** (bloqueante para código): `apiFetch` y `getFlags` en `apps/web/lib/api.ts` (para el filtro por key). **No requiere 07 ni 08** para implementar la vista.
+- **04 — API feature flags**: las operaciones de escritura (crear/editar/archivar flag, crear/eliminar regla) ya **registran entradas en el audit log**, y existe el endpoint `GET /api/v1/audit-log`.
+- **05 — Basic login**: sesión por cookie; páginas admin protegidas.
 - Transitivamente: **01** (monorepo + Next + Tailwind), **02** (Vitest + testing de componentes), **03** (DB/seed).
+
+### Dependencias blandas (datos, no código)
+
+- **07** (editar flag → CA-09) y **08** (crear/eliminar reglas): generan entradas reales en el audit log para pruebas manuales y E2E. Los tests de componente mockean `getAuditLog`; no bloquean el desarrollo.
+
+### Multitask y paralelización
+
+| Campo | Valor |
+|-------|-------|
+| **Wave** | **2** — tras completar **06** (en paralelo con **07**) |
+| **Paralelo con** | **07** en wave 2; **08** en wave 3 si 07 ya terminó |
+| **Requiere antes** | 04, 05, **06** |
+| **No requiere antes** | 07, 08 (solo para datos de prueba manual) |
+| **No paralelizar con** | **06** (prerequisito) |
+
+```
+Wave 1:  [06]
+Wave 2:  [07] ║ [11]   ← correr en paralelo
+Wave 3:  [08] ║ [11]   ← 11 puede seguir o ya estar hecha
+```
+
+**Conflictos probables al correr en paralelo con 07 u 08:**
+
+| Archivo | Riesgo | Mitigación |
+|---------|--------|------------|
+| `apps/web/lib/api.ts` | Medio — añade `getAuditLog` | Función independiente; merge al final del archivo |
+| Navegación admin | Medio — enlace a `/history` | Combinar con enlaces de 07/08 en el merge |
+
+**Archivos exclusivos de esta spec (sin conflicto con 07/08):** `apps/web/app/history/`, `AuditLogTable`, `FlagFilter`.
 
 ### Modelo de datos
 
@@ -63,7 +91,7 @@ Página admin: requiere sesión por cookie (spec 05). Reenviar cookie en server 
 
 ## 4. Tareas en orden
 
-1. **Extender el helper de API** (`apps/web/src/lib/api.ts`): `getAuditLog(flagKey?)` → `GET /audit-log` (añadiendo `?flag=<key>` solo si se pasa) → `AuditLogEntry[]` tipado.
+1. **Extender el helper de API** (`apps/web/lib/api.ts`): `getAuditLog(flagKey?)` → `GET /audit-log` (añadiendo `?flag=<key>` solo si se pasa) → `AuditLogEntry[]` tipado.
 2. **Tipos**: definir `AuditLogEntry` con la forma exacta del contrato.
 3. **Página** `/history`: server component preferido que carga el log (reenviando cookie) y lo pasa a la tabla; el filtro vía `searchParams` (`?flag=`).
 4. **Componente** `AuditLogTable`: renderiza columnas timestamp/entity_type/action/field/old_value/new_value; formatea `timestamp`; muestra old/new de forma legible (p. ej. `old → new`).
