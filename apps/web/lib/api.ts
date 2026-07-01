@@ -1,5 +1,5 @@
 import type { AuditLogEntry } from "@/types/audit-log";
-import type { Flag, FlagStatus } from "@/types/flags";
+import type { CreateFlagInput, Flag, FlagStatus, UpdateFlagPatch } from "@/types/flags";
 
 export const API_URL = process.env.API_URL ?? "http://127.0.0.1:3001";
 export const SESSION_COOKIE_NAME =
@@ -79,4 +79,59 @@ export async function getAuditLog(flagKey?: string): Promise<AuditLogEntry[]> {
   }
 
   return data as AuditLogEntry[];
+}
+
+async function readErrorMessage(response: Response): Promise<string> {
+  try {
+    const data: unknown = await response.json();
+    if (
+      data !== null &&
+      typeof data === "object" &&
+      "message" in data &&
+      typeof data.message === "string"
+    ) {
+      return data.message;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return `Request failed (${response.status})`;
+}
+
+export async function getFlag(key: string): Promise<Flag> {
+  const response = await apiFetch(`/flags/${encodeURIComponent(key)}`);
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response), response.status);
+  }
+
+  return (await response.json()) as Flag;
+}
+
+export async function createFlag(input: CreateFlagInput): Promise<Flag> {
+  const response = await apiFetch("/flags", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response), response.status);
+  }
+
+  return (await response.json()) as Flag;
+}
+
+export async function updateFlag(key: string, patch: UpdateFlagPatch): Promise<Flag> {
+  const response = await apiFetch(`/flags/${encodeURIComponent(key)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+
+  if (!response.ok) {
+    throw new ApiError(await readErrorMessage(response), response.status);
+  }
+
+  return (await response.json()) as Flag;
 }
