@@ -45,13 +45,17 @@ export function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <div
-        className="w-full max-w-sm rounded-xl border border-slate-800 bg-slate-900 p-8 shadow-lg"
-        data-testid="login-form"
-      >
-        <h1 className="mb-2 text-xl font-semibold text-white">Feature Flags</h1>
-        <p className="mb-6 text-sm text-slate-400">Inicia sesión con el usuario demo</p>
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#0d1f17] via-[#0a0f0d] to-black px-4">
+      <div className="w-full max-w-md" data-testid="login-form">
+        <div className="mb-8 flex items-center gap-2">
+          <span className="inline-block h-7 w-7 rotate-45 rounded-md bg-[#98ca3f]" aria-hidden />
+          <span className="text-2xl font-bold text-white">Feature Flags</span>
+        </div>
+
+        <h1 className="mb-3 text-3xl font-bold text-white">Ingresa a tu cuenta</h1>
+        <p className="mb-8 text-sm text-slate-400">
+          Usa el usuario demo para continuar.
+        </p>
 
         <form
           className="space-y-4"
@@ -67,7 +71,7 @@ export function LoginForm() {
           }}
         >
           <div>
-            <label htmlFor="username" className="mb-1 block text-sm text-slate-300">
+            <label htmlFor="username" className="sr-only">
               Usuario
             </label>
             <input
@@ -75,15 +79,16 @@ export function LoginForm() {
               name="username"
               type="text"
               autoComplete="username"
+              placeholder="Usuario"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-sky-500"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-5 py-4 text-white placeholder-slate-500 outline-none transition focus:border-[#98ca3f] focus:ring-1 focus:ring-[#98ca3f]"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm text-slate-300">
+            <label htmlFor="password" className="sr-only">
               Contraseña
             </label>
             <input
@@ -91,10 +96,11 @@ export function LoginForm() {
               name="password"
               type="password"
               autoComplete="current-password"
+              placeholder="Contraseña"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-sky-500"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-5 py-4 text-white placeholder-slate-500 outline-none transition focus:border-[#98ca3f] focus:ring-1 focus:ring-[#98ca3f]"
             />
           </div>
 
@@ -107,9 +113,9 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-sky-600 py-2 font-medium text-white hover:bg-sky-500 disabled:opacity-50"
+            className="w-full rounded-xl bg-[#05a460] py-4 font-semibold text-black transition hover:bg-[#048a51] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Entrando…" : "Entrar"}
+            {loading ? "Entrando…" : "Continuar"}
           </button>
         </form>
       </div>
