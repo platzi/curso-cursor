@@ -1,1 +1,2 @@
-export const DB_PACKAGE = "@ff/db";
+export * from "./schema.js";
+export * from "./client.js";
