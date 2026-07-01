@@ -26,7 +26,7 @@ export function LogoutButton() {
       type="button"
       onClick={() => void logout()}
       disabled={loading}
-      className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-200 hover:border-slate-500 disabled:opacity-50"
+      className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition hover:border-red-500 hover:bg-red-500 hover:text-white disabled:opacity-50"
     >
       {loading ? "Saliendo…" : "Cerrar sesión"}
     </button>
