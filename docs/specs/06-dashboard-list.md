@@ -10,13 +10,48 @@ Cubre **RF-15** (listado con key/name/status/default_value), **RF-04** (listar c
 
 ## 2. Contexto y dependencias
 
+### Estado actual del repo (punto de partida)
+
+- **05 — Basic login** implementada: `/login`, `/dashboard` (placeholder), `apps/web/middleware.ts`, proxy de auth en `apps/web/app/api/v1/auth/*`.
+- `apps/web/lib/api.ts` existe con `API_URL` y `SESSION_COOKIE_NAME` solamente; **aún no** hay `apiFetch` ni `getFlags`.
+- No existe la ruta `/flags`; el dashboard muestra un placeholder "specs posteriores".
+- Rutas reales del App Router: `apps/web/app/` (sin carpeta `src/`).
+
 ### Specs previas requeridas (deben estar implementadas)
 
-- **01 — Monorepo setup**: existe `apps/web` con Next.js (App Router), Tailwind configurado y TypeScript. Scripts `pnpm --filter web dev` y `pnpm --filter web build` funcionan.
-- **02 — Testing setup**: Vitest configurado en `apps/web` con testing de componentes (React Testing Library o equivalente) y `pnpm --filter web test` corre.
+- **01 — Monorepo setup**: existe `apps/web` con Next.js (App Router), Tailwind configurado y TypeScript. Scripts `pnpm --filter @ff/web dev` y `pnpm --filter @ff/web build` funcionan.
+- **02 — Testing setup**: Vitest configurado en `apps/web` con testing de componentes (React Testing Library o equivalente) y `pnpm --filter @ff/web test` corre.
 - **03 — DB schema + seed**: existe la flag de ejemplo `checkout_v2` en el seed, así que el listado tendrá al menos un registro real.
 - **04 — API feature flags**: el endpoint `GET /api/v1/flags?status=` está disponible y devuelve la lista.
 - **05 — Basic login**: existe sesión por cookie; las páginas admin (incluida esta) requieren sesión. El acceso sin sesión debe redirigir a login.
+
+### Specs posteriores que dependen de esta
+
+- **07 — Crear/editar flag**: requiere `apiFetch`, `getFlags`, tipos `Flag` y el listado en `/flags`.
+- **08 — Targeting rules**: depende transitivamente de 06 vía 07 (helper base y navegación).
+- **11 — Historial**: requiere `apiFetch` y `getFlags` (para el filtro por key); no requiere 07 ni 08 para implementar la vista.
+
+### Multitask y paralelización
+
+| Campo | Valor |
+|-------|-------|
+| **Wave** | **1** — primera de las specs 06–11; bloquea a 07, 08 y 11 |
+| **Paralelo con** | ninguna de 07, 08 u 11 |
+| **Bloquea** | 07 (directo), 08 (vía 07), 11 (helper + `getFlags`) |
+
+```
+Wave 1:  [06] ──┬──► 07 ──► 08
+                └──► 11 (paralelo con 07 tras 06)
+```
+
+**Entregables que desbloquean specs posteriores:**
+
+- `apps/web/lib/api.ts`: `apiFetch`, `getFlags` (extender el archivo existente).
+- Ruta `/flags` con listado y filtro por `status`.
+- Tipos `Flag` / `FlagStatus` (en `apps/web/types/flags.ts` o `@ff/domain` si ya los exporta).
+- Enlace por fila a `/flags/[key]` (destino puede ser placeholder hasta la spec 07).
+
+**Conflictos al correr en paralelo:** N/A — debe completarse sola antes de lanzar 07 u 11.
 
 ### Modelo de datos que consume esta spec
 
@@ -74,9 +109,9 @@ Es una página admin: requiere sesión por cookie (definida en spec 05). Si no h
 
 ## 4. Tareas en orden
 
-1. **Helper de fetch**: crear `apps/web/src/lib/api.ts` con `apiFetch(path, init?)` que prefija la base `/api/v1`, setea `credentials: 'include'` en cliente y, en server components, reenvía la cookie de sesión entrante. Exponer `getFlags(status?)` que llama a `GET /flags` (añadiendo `?status=` solo si se pasa) y devuelve `Flag[]` tipado.
-2. **Tipos compartidos**: definir/`import` el tipo `Flag` y `FlagStatus` (en `apps/web/src/types/flags.ts` o reutilizando `packages/domain` si lo exporta). Mantener la forma exacta del contrato.
-3. **Página de listado**: crear la ruta del listado (App Router, p. ej. `apps/web/src/app/flags/page.tsx`). Obtener las flags (server component preferido) y pasarlas a la tabla.
+1. **Helper de fetch**: extender `apps/web/lib/api.ts` con `apiFetch(path, init?)` que prefija la base `/api/v1`, setea `credentials: 'include'` en cliente y, en server components, reenvía la cookie de sesión entrante (reutilizar `API_URL` y `SESSION_COOKIE_NAME` ya definidos). Exponer `getFlags(status?)` que llama a `GET /flags` (añadiendo `?status=` solo si se pasa) y devuelve `Flag[]` tipado.
+2. **Tipos compartidos**: definir/`import` el tipo `Flag` y `FlagStatus` (en `apps/web/types/flags.ts` o reutilizando `packages/domain` si lo exporta). Mantener la forma exacta del contrato.
+3. **Página de listado**: crear la ruta del listado (App Router, p. ej. `apps/web/app/flags/page.tsx`). Obtener las flags (server component preferido) y pasarlas a la tabla.
 4. **Componente tabla** `FlagsTable`: renderiza columnas key/name/status/default_value; `status` como badge con color por estado; `default_value` como texto/booleano legible (p. ej. "true"/"false" o un chip On/Off). Cada fila enlaza a `/flags/[key]`.
 5. **Filtro por status** `StatusFilter`: selector controlado que actualiza el query param `?status=` (o estado de URL) y re-consulta. Opción "Todos" sin filtro.
 6. **Estados de UI**: implementar carga, vacío y error. Para vacío distinguir "no hay flags" vs "ningún resultado para el filtro X".
