@@ -12,8 +12,37 @@ Cubre **RF-16** (crear/editar desde formulario), **RF-01** (crear con todos los 
 
 ### Specs previas requeridas (deben estar implementadas)
 
-- **06 — Dashboard list**: existe el listado en `/flags`, el helper `apiFetch`/`getFlags` en `apps/web/src/lib/api.ts`, y el tipo `Flag`. Esta spec extiende ese helper con create/update y enlaza desde el listado/detalle.
+- **06 — Dashboard list**: existe el listado en `/flags`, el helper `apiFetch`/`getFlags` en `apps/web/lib/api.ts`, y el tipo `Flag`. Esta spec extiende ese helper con create/update y enlaza desde el listado/detalle.
 - Transitivamente (vía 06): **01** (monorepo + Next + Tailwind), **02** (Vitest + testing de componentes), **03** (seed con `checkout_v2`), **04** (API CRUD de flags), **05** (login + sesión por cookie; páginas admin protegidas).
+
+### Specs posteriores que dependen de esta
+
+- **08 — Targeting rules**: requiere la página de detalle `/flags/[key]`, `getFlag(key)` y tipos `ApiError`.
+
+### Multitask y paralelización
+
+| Campo | Valor |
+|-------|-------|
+| **Wave** | **2** — tras completar **06** |
+| **Paralelo con** | **11** (recomendado; no comparten páginas de flag) |
+| **Bloquea** | **08** |
+| **No paralelizar con** | **06** (prerequisito), **08** (requiere detalle y `getFlag`) |
+
+```
+Wave 1:  [06]
+Wave 2:  [07] ║ [11]   ← correr en paralelo
+Wave 3:  [08]            ← tras terminar 07
+```
+
+**Conflictos probables al correr en paralelo con 11:**
+
+| Archivo | Riesgo | Mitigación |
+|---------|--------|------------|
+| `apps/web/lib/api.ts` | Medio — ambas añaden funciones | Añadir bloques al final; no renombrar `apiFetch` |
+| Navegación admin (`layout` o componente nav) | Medio — cada spec añade enlaces | Combinar ambos enlaces en el merge |
+| `apps/web/app/flags/page.tsx` | Bajo — solo esta spec añade botón "Nueva flag" | 11 no toca esta ruta |
+
+**Archivos exclusivos de esta spec (sin conflicto con 11):** `apps/web/app/flags/new/`, `apps/web/app/flags/[key]/`, formularios y `StatusControl`.
 
 ### Modelo de datos
 
@@ -81,7 +110,7 @@ Páginas admin: requieren sesión por cookie (spec 05). Propagar cookie en serve
 
 ## 4. Tareas en orden
 
-1. **Extender el helper de API** (`apps/web/src/lib/api.ts`):
+1. **Extender el helper de API** (`apps/web/lib/api.ts`):
    - `createFlag(input)` → `POST /flags`; tipa `input` como `CreateFlagInput` (`key, name, description, type:'release', default_value, fail_mode`). Debe distinguir y propagar el **409** (p. ej. lanzar un error tipado `ApiError` con `status`).
    - `getFlag(key)` → `GET /flags/:key`.
    - `updateFlag(key, patch)` → `PATCH /flags/:key`; `patch` parcial (`name?, description?, default_value?, fail_mode?, status?`).

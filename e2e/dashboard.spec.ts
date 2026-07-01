@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { loginViaUi } from "./helpers";
+import { loginAsDemo, loginViaUi } from "./helpers";
 
 test.describe("spec 06 — listado de flags", () => {
   test("CA-06: /flags sin sesión redirige a login", async ({ page }) => {
@@ -25,5 +25,24 @@ test.describe("spec 06 — listado de flags", () => {
     await expect(
       page.getByText('Ningún resultado para el filtro "active".'),
     ).toBeVisible();
+  });
+});
+
+test.describe("spec 07 — crear y editar flag", () => {
+  test("formulario de creación valida key vacía", async ({ page }) => {
+    await loginAsDemo(page);
+    await page.goto("/flags/new");
+
+    await expect(page.getByRole("heading", { name: "Nueva feature flag" })).toBeVisible();
+    await page.getByRole("button", { name: "Crear flag" }).click();
+    await expect(page.getByText("La key es obligatoria")).toBeVisible();
+  });
+
+  test("Nueva flag enlaza desde el listado", async ({ page }) => {
+    await loginViaUi(page);
+    await page.goto("/flags");
+
+    await page.getByRole("link", { name: "Nueva flag" }).click();
+    await expect(page).toHaveURL(/\/flags\/new/);
   });
 });

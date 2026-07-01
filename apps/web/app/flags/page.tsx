@@ -43,6 +43,12 @@ export default async function FlagsPage({ searchParams }: FlagsPageProps) {
           </div>
           <div className="flex items-center gap-3">
             <Link
+              href="/flags/new"
+              className="rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-500"
+            >
+              Nueva flag
+            </Link>
+            <Link
               href="/dashboard"
               className="text-sm text-slate-400 hover:text-slate-200"
             >
