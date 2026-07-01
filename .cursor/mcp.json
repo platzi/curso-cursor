@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "libsql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@xexr/mcp-libsql",
+        "--url",
+        "file:///home/toro/Code/curso-cursor/packages/db/local.db",
+        "--log-mode",
+        "none"
+      ]
+    }
+  }
+}
