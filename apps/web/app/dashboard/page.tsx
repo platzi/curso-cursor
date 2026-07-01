@@ -33,18 +33,22 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-white">
+    <main className="min-h-screen bg-gradient-to-br from-[#0d1f17] via-[#0a0f0d] to-black px-6 py-10 text-white">
       <div className="mx-auto flex max-w-3xl items-center justify-between">
         <div>
+          <div className="mb-3 flex items-center gap-2">
+            <span className="inline-block h-6 w-6 rotate-45 rounded-md bg-[#05a460]" aria-hidden />
+            <span className="text-lg font-bold">Feature Flags</span>
+          </div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
           <p className="mt-1 text-slate-400">
-            Sesión activa como <span className="text-sky-400">{session.username}</span>
+            Sesión activa como <span className="font-medium text-[#05a460]">{session.username}</span>
           </p>
         </div>
         <LogoutButton />
       </div>
 
-      <section className="mx-auto mt-10 max-w-3xl rounded-xl border border-slate-800 bg-slate-900 p-6">
+      <section className="mx-auto mt-10 max-w-3xl rounded-xl border border-white/10 bg-black/40 p-6">
         <h2 className="text-lg font-medium">Feature Flags</h2>
         <p className="mt-2 text-sm text-slate-400">
           Panel de gestión (specs posteriores). Has iniciado sesión correctamente.
