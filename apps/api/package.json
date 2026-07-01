@@ -4,16 +4,22 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "DATABASE_URL=file:../../packages/db/local.db pnpm exec tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@ff/db": "workspace:*",
+    "@ff/domain": "workspace:*",
     "@hono/node-server": "^2.0.0",
-    "hono": "^4.12.0"
+    "hono": "^4.12.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.20.0",
-    "tsx": "^4.22.0"
+    "tsx": "^4.22.0",
+    "vitest": "^4.1.9"
   }
 }

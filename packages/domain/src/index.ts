@@ -1,1 +1,1 @@
-export const DOMAIN_PACKAGE = "@ff/domain";
+export * from "./types.js";
